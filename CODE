@@ -1,0 +1,71 @@
+#include <TridentTD_LineNotify.h>
+#define BLYNK_TEMPLATE_ID "TMPL6FHfIUGN1"
+#define BLYNK_TEMPLATE_NAME "LED"
+#define BLYNK_AUTH_TOKEN "z9e32xdFuarVF2cRaTGeLAvv5haywW7q"
+
+
+#define BLYNK_PRINT Serial
+#include <ESP8266WiFi.h>  
+#include <BlynkSimpleEsp8266.h>
+
+#define SSID        "iFong"                                     //ใส่ ชื่อ Wifi ที่จะเชื่อมต่อ
+#define PASSWORD    "67676767"                                   //ใส่ รหัส Wifi
+#define LINE_TOKEN  "6tShEz5RokpSkCsI8slMuGQqWiuhyeTzIz7hHrKmpvU" //ใส่ รหัส TOKEN ที่ได้มาจากข้างบน
+#define LDR A0
+#define LED D0
+int n=0;
+void setup() {
+ 
+Serial.begin(9600); 
+pinMode(LED,OUTPUT);
+Serial.println();
+Serial.println(LINE.getVersion());
+
+Blynk.begin(BLYNK_AUTH_TOKEN, SSID , PASSWORD);
+    
+  WiFi.begin(SSID, PASSWORD);
+  Serial.printf("WiFi connecting to %s\n",  SSID);
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print(".");
+    delay(400);
+  }
+  Serial.printf("\nWiFi connected\nIP : ");
+  Serial.println(WiFi.localIP());
+
+  // กำหนด Line Token
+  LINE.setToken(LINE_TOKEN);
+
+}
+
+BLYNK_WRITE(V0)
+{   
+ 
+  int value = param.asInt(); // Get value as integer
+  Serial.println(value);
+  if(value!=1){
+    n=0;
+    digitalWrite(LED,LOW);
+    LINE.notify("LIGH OFF ALREADY");
+  }
+  else{
+    n++;
+  }
+}
+ 
+void loop(){
+  Blynk.run();
+  int valueLDR = analogRead(LDR);
+  Serial.println(valueLDR);
+  while(n>=1){
+    if(valueLDR <=100){
+      digitalWrite(LED,HIGH);
+      LINE.notify("LIGHT ON");
+      break;
+    }
+    else{
+      digitalWrite(LED,LOW);
+      LINE.notify("LIGHT OFF");
+      break;
+     }
+  }
+}
